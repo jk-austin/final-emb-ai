@@ -41,6 +41,10 @@ def sent_analyzer():
         f"The dominant emotion is **{dominant_emotion}** with a score of **{dominant_score:.3f}**."
     )
 
+@app.route("/")
+def render_index_page():
+    return render_template('index.html')
+    
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
     
