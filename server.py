@@ -3,15 +3,33 @@ from EmotionDetection.emotion_detection import emotion_detector
 
 app = Flask("EmotionDetector")
 
-@app.route("/emotionDetector")
+@app.route("/emotionDetector", methods=['GET', 'POST'], strict_slashes=False)
 
 def sent_analyzer():
     # Retrieve the text to analyze from the request arguments
     text_to_analyze = request.args.get('textToAnalyze')
+    print(f"Input text: {text_to_analyze}")
+
+    if not text_to_analyze:
+        return "Invalid text! Please try again!", 400
+
+    # For POST requests (if applicable), get input from form data
+    if not text_to_analyze and request.method == 'POST':
+        text_to_analyze = request.form.get('textToAnalyze')
     
+    #to check input in logs
+    print(f"Received input text: {text_to_analyze}")
+
+    if text_to_analyze is None or text_to_analyze.strip() == "":
+        return "Invalid text! Please try again!", 400
+
     # Pass the text to the emotion_detector function and store the response
     response = emotion_detector(text_to_analyze)
-    
+    print(f"Emotion detector response: {response}")
+
+    if response is None:
+        return "Invalid text! Please try again.", 400
+
     # Extract the emotion scores from the response
     anger = response['anger']
     disgust = response['disgust']
@@ -27,8 +45,16 @@ def sent_analyzer():
         'joy': joy,
         'sadness': sadness
     }
-    dominant_emotion = max(emotions, key=emotions.get)
-    dominant_score = emotions[dominant_emotion]
+    print(f"Emotions extracted: {emotions}")
+
+    # Filter emotions to keep only those with non-None values
+    valid_emotions = {k: v for k, v in emotions.items() if v is not None}
+
+    if not valid_emotions:
+        return "Invalid text! Please try again."
+    
+    dominant_emotion = max(valid_emotions, key=valid_emotions.get)
+    dominant_score = valid_emotions[dominant_emotion]
     
     # Return a formatted string with the sentiment label and score
     return (
@@ -38,7 +64,7 @@ def sent_analyzer():
         f"- Fear: {fear:.3f}\n"
         f"- Joy: {joy:.3f}\n"
         f"- Sadness: {sadness:.3f}\n\n"
-        f"The dominant emotion is **{dominant_emotion}** with a score of **{dominant_score:.3f}**."
+        f"The dominant emotion is {dominant_emotion} with a score of {dominant_score:.3f}."
     )
 
 @app.route("/")
@@ -47,4 +73,3 @@ def render_index_page():
     
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
-    
