@@ -1,3 +1,10 @@
+"""
+This module provides emotion detection via a remote NLP API.
+
+It defines a function `emotion_detector` that returns emotion scores
+for a given input string using IBM Watson's EmotionPredict service.
+"""
+
 import requests
 import json
 
@@ -20,7 +27,7 @@ def emotion_detector(text_to_analyze):
         #identify dominant emotion
         dominant_emotion = max(emotions, key=emotions.get)
         dominant_score = emotions[dominant_emotion]
-$
+
         return {
             'anger': emotions.get('anger'),
             'disgust': emotions.get('disgust'),

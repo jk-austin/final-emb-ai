@@ -1,3 +1,10 @@
+"""
+This module provides emotion detection via a remote NLP API.
+
+It defines a function `emotion_detector` that returns emotion scores
+for a given input string using IBM Watson's EmotionPredict service.
+"""
+
 from flask import Flask, render_template, request
 from EmotionDetection.emotion_detection import emotion_detector
 
@@ -6,6 +13,13 @@ app = Flask("EmotionDetector")
 @app.route("/emotionDetector", methods=['GET', 'POST'], strict_slashes=False)
 
 def sent_analyzer():
+    """
+    Handles the /emotionDetector/ endpoint.
+
+    Retrieves text input, calls emotion_detector, and returns
+    emotion analysis results or appropriate error messages.
+    """
+
     # Retrieve the text to analyze from the request arguments
     text_to_analyze = request.args.get('textToAnalyze')
     print(f"Input text: {text_to_analyze}")
@@ -16,7 +30,7 @@ def sent_analyzer():
     # For POST requests (if applicable), get input from form data
     if not text_to_analyze and request.method == 'POST':
         text_to_analyze = request.form.get('textToAnalyze')
-    
+
     #to check input in logs
     print(f"Received input text: {text_to_analyze}")
 
@@ -36,7 +50,7 @@ def sent_analyzer():
     fear = response['fear']
     joy = response['joy']
     sadness = response['sadness']
-    
+
     # Create emotion dictionary to find dominant emotion
     emotions = {
         'anger': anger,
@@ -52,10 +66,10 @@ def sent_analyzer():
 
     if not valid_emotions:
         return "Invalid text! Please try again."
-    
+
     dominant_emotion = max(valid_emotions, key=valid_emotions.get)
     dominant_score = valid_emotions[dominant_emotion]
-    
+
     # Return a formatted string with the sentiment label and score
     return (
         f"For the given statement, the system response is:\n"
@@ -69,7 +83,10 @@ def sent_analyzer():
 
 @app.route("/")
 def render_index_page():
+    """
+    Handles the output to the index.
+    """
     return render_template('index.html')
-    
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
